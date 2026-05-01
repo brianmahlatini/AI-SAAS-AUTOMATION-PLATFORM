@@ -11,7 +11,7 @@ export type BuilderNodeData = {
   config: Record<string, unknown>;
 };
 
-export function WorkflowNodeCard({ data, selected }: NodeProps) {
+export function WorkflowNodeCard({ data, selected, isConnectable }: NodeProps) {
   const nodeData = data as BuilderNodeData;
   const catalog = getCatalogNode(nodeData.nodeType);
   const Icon = catalog.icon;
@@ -24,7 +24,13 @@ export function WorkflowNodeCard({ data, selected }: NodeProps) {
         selected ? "border-teal ring-2 ring-teal/20" : "border-line"
       )}
     >
-      <Handle type="target" position={Position.Top} />
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectable={isConnectable}
+        title="Connect into this node"
+        className="workflow-handle workflow-handle-target"
+      />
       <div className="flex items-start gap-3">
         <span className={clsx("mt-0.5", catalog.color)}>
           <Icon size={18} />
@@ -37,11 +43,31 @@ export function WorkflowNodeCard({ data, selected }: NodeProps) {
 
       {isCondition ? (
         <>
-          <Handle id="false" type="source" position={Position.Left} className="!bg-coral" />
-          <Handle id="true" type="source" position={Position.Right} className="!bg-emerald-600" />
+          <Handle
+            id="true"
+            type="source"
+            position={Position.Right}
+            isConnectable={isConnectable}
+            title="Connect true branch"
+            className="workflow-handle workflow-handle-source !bg-emerald-600"
+          />
+          <Handle
+            id="false"
+            type="source"
+            position={Position.Left}
+            isConnectable={isConnectable}
+            title="Connect false branch"
+            className="workflow-handle workflow-handle-source !bg-coral"
+          />
         </>
       ) : (
-        <Handle type="source" position={Position.Bottom} />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          isConnectable={isConnectable}
+          title="Connect out from this node"
+          className="workflow-handle workflow-handle-source"
+        />
       )}
     </div>
   );

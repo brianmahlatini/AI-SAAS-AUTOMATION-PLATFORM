@@ -42,10 +42,42 @@ textarea {
 }
 
 .react-flow__handle {
-  width: 9px;
-  height: 9px;
-  border: 2px solid #ffffff;
+  width: 16px;
+  height: 16px;
+  border: 3px solid #ffffff;
   background: #0f766e;
+  box-shadow:
+    0 0 0 2px rgba(15, 118, 110, 0.35),
+    0 6px 14px rgba(15, 23, 42, 0.18);
+  cursor: crosshair;
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.react-flow__handle:hover,
+.react-flow__handle.connectingfrom,
+.react-flow__handle.connectingto {
+  transform: scale(1.25);
+  box-shadow:
+    0 0 0 5px rgba(15, 118, 110, 0.18),
+    0 8px 18px rgba(15, 23, 42, 0.22);
+}
+
+.workflow-handle-target {
+  top: -9px;
+}
+
+.workflow-handle-source.react-flow__handle-bottom {
+  bottom: -9px;
+}
+
+.workflow-handle-source.react-flow__handle-left {
+  left: -9px;
+}
+
+.workflow-handle-source.react-flow__handle-right {
+  right: -9px;
 }
 
 .workflow-grid {
