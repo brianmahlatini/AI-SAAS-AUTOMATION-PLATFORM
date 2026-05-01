@@ -1,0 +1,102 @@
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: automation
+      POSTGRES_PASSWORD: automation
+      POSTGRES_DB: automation
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U automation -d automation"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongo:27017/automation
+      POSTGRES_URL: postgres://automation:automation@postgres:5432/automation
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: http://localhost:3001
+    ports:
+      - "4000:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run start
+
+  worker:
+    build:
+      context: ./backend
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongo:27017/automation
+      POSTGRES_URL: postgres://automation:automation@postgres:5432/automation
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    command: npm run worker:prod
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000
+        NEXT_PUBLIC_WS_URL: http://localhost:4000
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    env_file:
+      - ./.env
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_WS_URL: http://localhost:4000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+    command: npm run start
+
+volumes:
+  mongo_data:
+  postgres_data:
+  redis_data:
