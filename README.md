@@ -8,6 +8,10 @@ A production-oriented SaaS automation platform for building and running AI-power
 
 ![Dashboard](docs/assets/screenshots/dashboard.png)
 
+### Login
+
+![Login](docs/assets/screenshots/login.png)
+
 ### Workflow Builder
 
 ![Workflow Builder](docs/assets/screenshots/workflow-builder.png)
